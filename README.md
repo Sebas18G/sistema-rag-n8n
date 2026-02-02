@@ -1,6 +1,6 @@
 # Sistema RAG para Asistente Legal
 
-![Workflow RAG](./assets/workflow-rag.png)
+![Workflow RAG](./workflow-rag.png)
 
 ## 📋 Descripción General
 
