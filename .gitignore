@@ -1,0 +1,25 @@
+# SO
+.DS_Store
+Thumbs.db
+
+# Variables de entorno
+.env
+.env.*
+
+# Node / n8n
+node_modules/
+npm-debug.log*
+yarn-error.log*
+
+# n8n data sensible
+.n8n/
+.n8n-workflows/
+.n8n-credentials/
+
+# Logs
+logs/
+*.log
+
+# Temporales
+tmp/
+.cache/
