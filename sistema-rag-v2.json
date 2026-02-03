@@ -1,0 +1,1071 @@
+{
+  "name": "Sistema RAG Estandar",
+  "nodes": [
+    {
+      "parameters": {
+        "content": "## Consumo de datos",
+        "height": 672,
+        "width": 768,
+        "color": 6
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        -240,
+        -192
+      ],
+      "typeVersion": 1,
+      "id": "a8797f59-3234-4308-a698-782f827954b6",
+      "name": "Sticky Note1"
+    },
+    {
+      "parameters": {
+        "formTitle": "Cargar Documentos",
+        "formFields": {
+          "values": [
+            {
+              "fieldLabel": "Documentos",
+              "fieldType": "file",
+              "acceptFileTypes": ".pdf"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.formTrigger",
+      "typeVersion": 2.5,
+      "position": [
+        -1168,
+        -352
+      ],
+      "id": "812c49f5-b7c7-4dbb-ac83-4f4aca9b0ba6",
+      "name": "cargar_docs",
+      "webhookId": "a0b75fa1-972c-4268-b498-fa8c125ea841",
+      "disabled": true
+    },
+    {
+      "parameters": {
+        "mode": "insert",
+        "memoryKey": {
+          "__rl": true,
+          "value": "vector_store_key",
+          "mode": "list",
+          "cachedResultName": "vector_store_key"
+        },
+        "embeddingBatchSize": 250
+      },
+      "type": "@n8n/n8n-nodes-langchain.vectorStoreInMemory",
+      "typeVersion": 1.3,
+      "position": [
+        -784,
+        -368
+      ],
+      "id": "0aa9f30a-872c-46a5-ba9d-6e5561546410",
+      "name": "Simple Vector Store",
+      "disabled": true
+    },
+    {
+      "parameters": {
+        "model": "embeddinggemma:300m"
+      },
+      "type": "@n8n/n8n-nodes-langchain.embeddingsOllama",
+      "typeVersion": 1,
+      "position": [
+        -496,
+        352
+      ],
+      "id": "f80559a6-5147-4772-a465-f787becc0f29",
+      "name": "Embeddings Ollama",
+      "credentials": {
+        "ollamaApi": {
+          "id": "xDcVkyu4yoySv92g",
+          "name": "Credencial Ollama para localhost"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "dataType": "binary",
+        "textSplittingMode": "custom",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.documentDefaultDataLoader",
+      "typeVersion": 1.1,
+      "position": [
+        -784,
+        192
+      ],
+      "id": "645f799d-e94c-4a4c-bed9-4036afdffc98",
+      "name": "Default Data Loader"
+    },
+    {
+      "parameters": {
+        "chunkOverlap": 250,
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.textSplitterRecursiveCharacterTextSplitter",
+      "typeVersion": 1,
+      "position": [
+        -800,
+        336
+      ],
+      "id": "6c9969a3-76fe-4af6-968a-14fbd095320f",
+      "name": "Recursive Character Text Splitter"
+    },
+    {
+      "parameters": {
+        "options": {
+          "systemMessage": "=# Rol: Asistente Legal\n\n## Descripción\n\nEres un asistente legal diseñado para ayudar a un abogado a consultar información contenida en documentos legales internos.\nDebes responder, analizar y entregar respuestas precisas, claras y fundamentadas basadas únicamente en los documentos disponibles.\nMantén siempre un tono profesional y formal, y prioriza la exactitud legal en todas tus respuestas.\n\nTus respuestas deben de ser cortas y puntuales.\n\nSi no conoces la respuesta, responde que no dispones de la información.\n\n## Capacidades\n\n- Búsqueda y recuperación de información legal relevante.\n- Respuestas concisas y con fundamento en los documentos disponibles.\n- Inclusión de referencia del documento utilizado para responder.\n- Identificación de ausencia de información en los documentos.\n- Mantener confidencialidad y precisión en todas las respuestas.\n\n## Comportamiento\n\n1. Recepción de la consulta: Recibe la pregunta o solicitud del abogado.\n2. Búsqueda de información en la base de conocimiento para encontrar información relevante en los documentos.\n3. Generación de la respuesta:\n   - Si encuentras la información:\n     - Proporciona un resumen conciso, claro y preciso.\n     - Incluye la referencia del documento donde encontraste la información (nombre o identificación del documento y sección/cláusula si aplica).\n   - Si no encuentras la información:\n     - Responde únicamente con:\n\n       No puedo encontrar la respuesta en los recursos disponibles\n\n4. Confidencialidad: No reveles información fuera de lo que esté contenido en los documentos.\n5. Tono: Profesional, formal, claro y directo.\n\n## Ejemplo\n\nPregunta del abogado:\n> ¿Cuál es el procedimiento de terminación anticipada del contrato de arrendamiento?\n\nRespuesta del asistente:\n> Según el Contrato de Arrendamiento – Cláusula 12, el contrato puede ser terminado anticipadamente por cualquiera de las partes notificando con al menos 30 días de antelación y cumpliendo con el pago proporcional de las obligaciones pendientes.\n> Referencia: Contrato Arrendamiento 2025.pdf, Cláusula 12."
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        80,
+        -64
+      ],
+      "id": "f0421588-8737-4706-b1e2-bfe9e7ac6990",
+      "name": "AI Agent"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.chatTrigger",
+      "typeVersion": 1.4,
+      "position": [
+        -192,
+        -64
+      ],
+      "id": "606aaa3d-157e-462b-9e65-75b841e29b26",
+      "name": "When chat message received",
+      "webhookId": "485a7520-e839-408c-8b98-48a051b03d08"
+    },
+    {
+      "parameters": {
+        "model": "gpt-oss:latest",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOllama",
+      "typeVersion": 1,
+      "position": [
+        0,
+        160
+      ],
+      "id": "eb29f2a8-b31e-4d5d-8696-dd3c63bc85d7",
+      "name": "Ollama Chat Model",
+      "credentials": {
+        "ollamaApi": {
+          "id": "xDcVkyu4yoySv92g",
+          "name": "Credencial Ollama para localhost"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "content": "## Alimentar la base de datos\n",
+        "height": 672,
+        "width": 672,
+        "color": 4
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        -944,
+        -192
+      ],
+      "typeVersion": 1,
+      "id": "137236dd-51ea-4320-8161-fb949337c2aa",
+      "name": "Sticky Note"
+    },
+    {
+      "parameters": {
+        "contextWindowLength": 30
+      },
+      "type": "@n8n/n8n-nodes-langchain.memoryBufferWindow",
+      "typeVersion": 1.3,
+      "position": [
+        160,
+        160
+      ],
+      "id": "d6494244-bf65-48e3-84b3-94c33392a81d",
+      "name": "Simple Memory"
+    },
+    {
+      "parameters": {
+        "mode": "retrieve-as-tool",
+        "toolDescription": "Aqui puedes tomar los documentos cargados como base de información",
+        "memoryKey": {
+          "__rl": true,
+          "mode": "list",
+          "value": "vector_store_key"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.vectorStoreInMemory",
+      "typeVersion": 1.3,
+      "position": [
+        -16,
+        -352
+      ],
+      "id": "2eaeb899-6acc-4881-9ac5-38239e3344be",
+      "name": "Simple Vector Store1",
+      "disabled": true
+    },
+    {
+      "parameters": {
+        "content": "## Seleccion de Documentos",
+        "height": 704,
+        "width": 2400,
+        "color": 5
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        -3376,
+        -192
+      ],
+      "typeVersion": 1,
+      "id": "06d17939-dc6c-4b5e-8ddb-b4dfcd82d21e",
+      "name": "Sticky Note2"
+    },
+    {
+      "parameters": {
+        "mode": "insert",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.vectorStorePGVector",
+      "typeVersion": 1.3,
+      "position": [
+        -848,
+        -80
+      ],
+      "id": "f5e13a29-6c9b-42ef-9f16-d3c71313af01",
+      "name": "Postgres PGVector Store",
+      "credentials": {
+        "postgres": {
+          "id": "vEeTJVbUTD7iZGNw",
+          "name": "postgre_neontech"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "description": "Aqui puedes tomar los documentos cargados como base de información con el fin de responder preguntas relacionadas a los documentos."
+      },
+      "type": "@n8n/n8n-nodes-langchain.toolVectorStore",
+      "typeVersion": 1.1,
+      "position": [
+        272,
+        160
+      ],
+      "id": "23fe2049-0acb-4d65-822f-c083a30f18ec",
+      "name": "Answer questions with a vector store"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.vectorStorePGVector",
+      "typeVersion": 1.3,
+      "position": [
+        32,
+        320
+      ],
+      "id": "5b89f7f1-65ed-4bb4-9791-ea0b9bdb1971",
+      "name": "Postgres PGVector Store1",
+      "credentials": {
+        "postgres": {
+          "id": "vEeTJVbUTD7iZGNw",
+          "name": "postgre_neontech"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "model": "gpt-oss:latest",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOllama",
+      "typeVersion": 1,
+      "position": [
+        368,
+        352
+      ],
+      "id": "4adba056-8208-4a0b-ab3f-7b57e4286daf",
+      "name": "Ollama Chat Model1",
+      "credentials": {
+        "ollamaApi": {
+          "id": "xDcVkyu4yoySv92g",
+          "name": "Credencial Ollama para localhost"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "pollTimes": {
+          "item": [
+            {}
+          ]
+        },
+        "triggerOn": "specificFolder",
+        "folderToWatch": {
+          "__rl": true,
+          "value": "1ZwKPG5mYD24Ngk3LsVOrRvOAq7lwjypi",
+          "mode": "list",
+          "cachedResultName": "Documentos_legales",
+          "cachedResultUrl": "https://drive.google.com/drive/folders/1ZwKPG5mYD24Ngk3LsVOrRvOAq7lwjypi"
+        },
+        "event": "fileCreated",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleDriveTrigger",
+      "typeVersion": 1,
+      "position": [
+        -3184,
+        -432
+      ],
+      "id": "0e131517-1d32-4dc7-881a-dcdd0b8e95ad",
+      "name": "Google Drive - Documentos legales - Gmail",
+      "credentials": {
+        "googleDriveOAuth2Api": {
+          "id": "i7ggoosdp2SyNONl",
+          "name": "Google Drive - OAuth2"
+        }
+      },
+      "disabled": true
+    },
+    {
+      "parameters": {
+        "operation": "download",
+        "fileId": {
+          "__rl": true,
+          "value": "={{ $json.file_id }}",
+          "mode": "id"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleDrive",
+      "typeVersion": 3,
+      "position": [
+        -1168,
+        64
+      ],
+      "id": "1efdc6ae-ca73-4a52-9abf-07d56ceb6de7",
+      "name": "descargar_archivo",
+      "credentials": {
+        "googleDriveOAuth2Api": {
+          "id": "i7ggoosdp2SyNONl",
+          "name": "Google Drive - OAuth2"
+        }
+      }
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        -3184,
+        -128
+      ],
+      "id": "7e85328c-b3e2-41a8-9e8e-4c82ebc848c6",
+      "name": "When clicking ‘Execute workflow’"
+    },
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {}
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.3,
+      "position": [
+        -3184,
+        64
+      ],
+      "id": "14e3682d-4d68-4997-b0a8-fbdac024ee7f",
+      "name": "Schedule Trigger"
+    },
+    {
+      "parameters": {
+        "resource": "fileFolder",
+        "filter": {
+          "folderId": {
+            "__rl": true,
+            "value": "1ZwKPG5mYD24Ngk3LsVOrRvOAq7lwjypi",
+            "mode": "list",
+            "cachedResultName": "Documentos_legales",
+            "cachedResultUrl": "https://drive.google.com/drive/folders/1ZwKPG5mYD24Ngk3LsVOrRvOAq7lwjypi"
+          }
+        },
+        "options": {
+          "fields": [
+            "*"
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.googleDrive",
+      "typeVersion": 3,
+      "position": [
+        -2960,
+        -32
+      ],
+      "id": "8c032296-63a2-41bf-8bc0-67c5c85e8501",
+      "name": "buscar_archivos_y_directorios",
+      "credentials": {
+        "googleDriveOAuth2Api": {
+          "id": "i7ggoosdp2SyNONl",
+          "name": "Google Drive - OAuth2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "af7160b3-dab3-40c2-b466-f6ba8e9efa8b",
+              "leftValue": "={{ $json.mimeType }}",
+              "rightValue": "application/vnd.google-apps.folder",
+              "operator": {
+                "type": "string",
+                "operation": "notEquals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        -2768,
+        144
+      ],
+      "id": "bb65656d-c6d1-4399-908f-7e236a4a0f6f",
+      "name": "verificar_recursos"
+    },
+    {
+      "parameters": {
+        "resource": "fileFolder",
+        "returnAll": true,
+        "filter": {
+          "folderId": {
+            "__rl": true,
+            "value": "={{ $json.id }}",
+            "mode": "id"
+          }
+        },
+        "options": {
+          "fields": [
+            "*"
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.googleDrive",
+      "typeVersion": 3,
+      "position": [
+        -2464,
+        272
+      ],
+      "id": "cd80a5df-b048-4f9b-a435-b0a19e8dd713",
+      "name": "Search files and folders",
+      "credentials": {
+        "googleDriveOAuth2Api": {
+          "id": "i7ggoosdp2SyNONl",
+          "name": "Google Drive - OAuth2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "select count(*) as ingested from public.ingested_files\nwhere file_id = '{{ $json.id }}' and md5_checksum ='{{ $json.md5Checksum }}'",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [
+        -2512,
+        64
+      ],
+      "id": "c30605f1-b359-4c09-95d9-bf60c7eaa03f",
+      "name": "obtener_carga_previa",
+      "credentials": {
+        "postgres": {
+          "id": "vEeTJVbUTD7iZGNw",
+          "name": "postgre_neontech"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "3432567d-6c18-463e-84dc-e1d1663447b5",
+              "leftValue": "={{ $json.ingested }}",
+              "rightValue": "0",
+              "operator": {
+                "type": "string",
+                "operation": "notEquals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        -2288,
+        64
+      ],
+      "id": "621ad690-53ff-40bb-b5e6-46ab23eb8e8b",
+      "name": "verificar_carga_previamente"
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.noOp",
+      "typeVersion": 1,
+      "position": [
+        -2128,
+        -400
+      ],
+      "id": "96e8bab0-e7e2-4eb3-bb48-ec09f5a08f26",
+      "name": "No Operation, do nothing"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "19fc9020-5dac-4d1d-8aa7-8c02ab5a1636",
+              "name": "id",
+              "value": "={{ $('verificar_recursos').item.json.id }}",
+              "type": "string"
+            },
+            {
+              "id": "1f113416-219b-4215-b0b4-368498aab4fb",
+              "name": "md5Checksum",
+              "value": "={{ $('buscar_archivos_y_directorios').item.json.md5Checksum }}",
+              "type": "string"
+            },
+            {
+              "id": "cfd42955-27ad-4c35-837e-910efdaf9913",
+              "name": "mimeType",
+              "value": "={{ $('buscar_archivos_y_directorios').item.json.mimeType }}",
+              "type": "string"
+            },
+            {
+              "id": "fc0f5c6e-9d26-47ab-a66e-060033432fd4",
+              "name": "modifiedTime",
+              "value": "={{ $('verificar_recursos').item.json.modifiedTime }}",
+              "type": "string"
+            },
+            {
+              "id": "b14aca06-4039-4e33-b7fb-ae70fad5ec16",
+              "name": "name",
+              "value": "={{ $('verificar_recursos').item.json.name }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -2064,
+        64
+      ],
+      "id": "7dd4f9f3-ebfa-4f05-be20-e4d0ca4ac5b5",
+      "name": "extraer_variables"
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "delete from n8n_vectors where file_id= '{{ $json.id }}'",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [
+        -1840,
+        128
+      ],
+      "id": "15b678cb-0622-4de0-9c7e-e1789867058e",
+      "name": "borrar_referencias",
+      "alwaysOutputData": true,
+      "credentials": {
+        "postgres": {
+          "id": "vEeTJVbUTD7iZGNw",
+          "name": "postgre_neontech"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "mode": "chooseBranch"
+      },
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3.2,
+      "position": [
+        -1616,
+        64
+      ],
+      "id": "2c57296a-8973-4a19-9fed-ba8b82c29ab3",
+      "name": "esperar_eliminacion"
+    },
+    {
+      "parameters": {
+        "schema": {
+          "__rl": true,
+          "mode": "list",
+          "value": "public"
+        },
+        "table": {
+          "__rl": true,
+          "value": "ingested_files",
+          "mode": "list",
+          "cachedResultName": "ingested_files"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "name": "={{ $json.name }}",
+            "file_id": "={{ $json.id }}",
+            "mime_type": "={{ $json.mimeType }}",
+            "modified_time": "={{ $json.modifiedTime }}",
+            "md5_checksum": "={{ $json.md5Checksum }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "file_id",
+              "displayName": "file_id",
+              "required": true,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "name",
+              "displayName": "name",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "mime_type",
+              "displayName": "mime_type",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "md5_checksum",
+              "displayName": "md5_checksum",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "modified_time",
+              "displayName": "modified_time",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "dateTime",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "last_ingested",
+              "displayName": "last_ingested",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "dateTime",
+              "canBeUsedToMatch": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [
+        -1392,
+        64
+      ],
+      "id": "9977c5fa-050f-43b8-9eab-4e0d885f33b5",
+      "name": "insertar_documento",
+      "credentials": {
+        "postgres": {
+          "id": "vEeTJVbUTD7iZGNw",
+          "name": "postgre_neontech"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "UPDATE n8n_vectors\nSET file_id = '{{ $('extraer_variables').item.json.id }}'\nWHERE metadata->'loc'->'lines' = '{{ $json.metadata.loc.lines.toJsonString() }}' and file_id is null",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [
+        -496,
+        -80
+      ],
+      "id": "cd33a0d6-c196-403e-aeca-9e6da96cd309",
+      "name": "actualziar_file_id_tabla_vectores",
+      "credentials": {
+        "postgres": {
+          "id": "vEeTJVbUTD7iZGNw",
+          "name": "postgre_neontech"
+        }
+      }
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.noOp",
+      "typeVersion": 1,
+      "position": [
+        -288,
+        -400
+      ],
+      "id": "c1894abd-f102-492a-b3b7-57d08640b5ee",
+      "name": "No Operation, do nothing1"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "cargar_docs": {
+      "main": [
+        []
+      ]
+    },
+    "Embeddings Ollama": {
+      "ai_embedding": [
+        [
+          {
+            "node": "Postgres PGVector Store",
+            "type": "ai_embedding",
+            "index": 0
+          },
+          {
+            "node": "Postgres PGVector Store1",
+            "type": "ai_embedding",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Default Data Loader": {
+      "ai_document": [
+        [
+          {
+            "node": "Postgres PGVector Store",
+            "type": "ai_document",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Recursive Character Text Splitter": {
+      "ai_textSplitter": [
+        [
+          {
+            "node": "Default Data Loader",
+            "type": "ai_textSplitter",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "When chat message received": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Ollama Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Simple Memory": {
+      "ai_memory": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_memory",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Simple Vector Store1": {
+      "ai_tool": [
+        []
+      ]
+    },
+    "Answer questions with a vector store": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Postgres PGVector Store1": {
+      "ai_vectorStore": [
+        [
+          {
+            "node": "Answer questions with a vector store",
+            "type": "ai_vectorStore",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Ollama Chat Model1": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Answer questions with a vector store",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Drive - Documentos legales - Gmail": {
+      "main": [
+        []
+      ]
+    },
+    "descargar_archivo": {
+      "main": [
+        [
+          {
+            "node": "Postgres PGVector Store",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "When clicking ‘Execute workflow’": {
+      "main": [
+        [
+          {
+            "node": "buscar_archivos_y_directorios",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Schedule Trigger": {
+      "main": [
+        [
+          {
+            "node": "buscar_archivos_y_directorios",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "buscar_archivos_y_directorios": {
+      "main": [
+        [
+          {
+            "node": "verificar_recursos",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "verificar_recursos": {
+      "main": [
+        [
+          {
+            "node": "obtener_carga_previa",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Search files and folders",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Search files and folders": {
+      "main": [
+        [
+          {
+            "node": "verificar_recursos",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "obtener_carga_previa": {
+      "main": [
+        [
+          {
+            "node": "verificar_carga_previamente",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "verificar_carga_previamente": {
+      "main": [
+        [
+          {
+            "node": "No Operation, do nothing",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "extraer_variables",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "extraer_variables": {
+      "main": [
+        [
+          {
+            "node": "borrar_referencias",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "esperar_eliminacion",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "borrar_referencias": {
+      "main": [
+        [
+          {
+            "node": "esperar_eliminacion",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "esperar_eliminacion": {
+      "main": [
+        [
+          {
+            "node": "insertar_documento",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "insertar_documento": {
+      "main": [
+        [
+          {
+            "node": "descargar_archivo",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Postgres PGVector Store": {
+      "main": [
+        [
+          {
+            "node": "actualziar_file_id_tabla_vectores",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "actualziar_file_id_tabla_vectores": {
+      "main": [
+        [
+          {
+            "node": "No Operation, do nothing1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "availableInMCP": false
+  },
+  "versionId": "32a88dd2-7363-46c3-afa5-e61a12b9cc4a",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "4758e594f2e1e717a035e18a7e437c95228375d6960d9224ec32486871c79d56"
+  },
+  "id": "ut0c41GxvpmEH0MNRnEDq",
+  "tags": []
+}
